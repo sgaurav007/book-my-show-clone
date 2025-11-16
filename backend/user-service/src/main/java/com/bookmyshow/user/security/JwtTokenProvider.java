@@ -36,11 +36,11 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
-            .setSubject(userId.toString())
+            .subject(userId.toString())
             .claim("email", email)
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(key, SignatureAlgorithm.HS512)
+            .issuedAt(now)
+            .expiration(expiryDate)
+            .signWith(key)
             .compact();
     }
 
@@ -49,38 +49,34 @@ public class JwtTokenProvider {
     }
 
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(key)
+        Claims claims = Jwts.parser()
+            .verifyWith(key)
             .build()
-            .parseClaimsJws(token)
-            .getBody();
+            .parseSignedClaims(token)
+            .getPayload();
 
         return Long.parseLong(claims.getSubject());
     }
 
     public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(key)
+        Claims claims = Jwts.parser()
+            .verifyWith(key)
             .build()
-            .parseClaimsJws(token)
-            .getBody();
+            .parseSignedClaims(token)
+            .getPayload();
 
         return claims.get("email", String.class);
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                .setSigningKey(key)
+            Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token);
+                .parseSignedClaims(token);
             return true;
-        } catch (MalformedJwtException ex) {
-            log.error("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            log.error("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            log.error("Unsupported JWT token");
+        } catch (JwtException ex) {
+            log.error("Invalid JWT token: {}", ex.getMessage());
         } catch (IllegalArgumentException ex) {
             log.error("JWT claims string is empty");
         }
