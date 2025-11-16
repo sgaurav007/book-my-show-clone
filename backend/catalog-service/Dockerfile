@@ -1,21 +1,17 @@
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM maven:3.9.5-eclipse-temurin-17 AS builder
 
 WORKDIR /app
 
-# Copy shared common module
+# Copy and build shared common module
 COPY shared/common /app/shared/common
-
-# Build shared common module
 WORKDIR /app/shared/common
-RUN ./mvnw clean install -DskipTests
+RUN mvn clean install -DskipTests
 
-# Copy catalog service
+# Copy and build catalog service
 WORKDIR /app
 COPY backend/catalog-service /app/catalog-service
-
-# Build catalog service
 WORKDIR /app/catalog-service
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 
@@ -23,6 +19,6 @@ WORKDIR /app
 
 COPY --from=builder /app/catalog-service/target/*.jar app.jar
 
-EXPOSE 8081
+EXPOSE 8082
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

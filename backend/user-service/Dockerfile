@@ -1,19 +1,24 @@
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM maven:3.9.5-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-COPY backend/user-service/pom.xml .
-COPY backend/user-service/src ./src
+# Copy and build shared common module first
+COPY shared/common /app/shared/common
+WORKDIR /app/shared/common
+RUN mvn clean install -DskipTests
 
-RUN apk add --no-cache maven
-
+# Copy and build user service
+WORKDIR /app
+COPY backend/user-service/pom.xml ./user-service/pom.xml
+COPY backend/user-service/src ./user-service/src
+WORKDIR /app/user-service
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/user-service/target/*.jar app.jar
 
 EXPOSE 8081
 
