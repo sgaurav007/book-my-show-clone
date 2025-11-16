@@ -22,25 +22,40 @@ frontend/.remix/
 frontend/playwright-report/
 frontend/test-results/
 
-# ==================== Backend (Java / Spring Boot / Maven) ====================
+# ==================== Backend (Python / FastAPI) ====================
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Poetry
+poetry.lock
+
+# Alembic
+backend/*/alembic/versions/*.pyc
+
+# Old Java/Maven (kept for reference during migration cleanup)
 backend/*/target/
 backend/*/.mvn/
 backend/*/mvnw
 backend/*/mvnw.cmd
-backend/*/.classpath
-backend/*/.project
-backend/*/.settings/
-backend/*/.factorypath
-backend/*/bin/
-backend/*/*.jar
-backend/*/*.war
-backend/*/*.ear
 backend/*/.gradle/
 backend/*/build/
-backend/*/.idea/
-backend/*/*.iml
-backend/*/*.ipr
-backend/*/*.iws
 
 # ==================== IDEs ====================
 .idea/
@@ -56,7 +71,7 @@ backend/*/*.iws
 .DS_Store
 
 # ==================== Docker ====================
-*.dockerignore
+# Keep .dockerignore files
 
 # ==================== Databases ====================
 *.db

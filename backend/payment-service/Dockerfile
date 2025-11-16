@@ -1,25 +1,50 @@
-FROM maven:3.9.5-eclipse-temurin-17 AS build
+# Multi-stage build for Payment Service
+
+# Stage 1: Builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Copy and build shared common module first
-COPY shared/common /app/shared/common
-WORKDIR /app/shared/common
-RUN mvn clean install -DskipTests
+# Install poetry
+RUN pip install --no-cache-dir poetry==1.7.1
 
-# Copy and build payment service
-WORKDIR /app
-COPY backend/payment-service/pom.xml ./payment-service/pom.xml
-COPY backend/payment-service/src ./payment-service/src
-WORKDIR /app/payment-service
-RUN mvn clean package -DskipTests
+# Copy dependency files
+COPY pyproject.toml ./
 
-FROM eclipse-temurin:17-jre-alpine
+# Export dependencies to requirements.txt
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+# Stage 2: Runtime
+FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY --from=build /app/payment-service/target/*.jar app.jar
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
 
+# Copy requirements from builder
+COPY --from=builder /app/requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY app/ ./app/
+COPY alembic/ ./alembic/
+COPY alembic.ini .
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
 EXPOSE 8084
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8084/health')" || exit 1
+
+# Run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8084"]

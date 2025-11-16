@@ -33,11 +33,11 @@ echo Waiting 60 seconds for services to start...
 timeout /t 60 /nobreak >nul
 echo.
 
-REM Step 3: Start API Gateway
-echo Step 3/4: Starting API Gateway...
-docker-compose up -d api-gateway
+REM Step 3: Start Gateway Service
+echo Step 3/4: Starting Gateway Service...
+docker-compose up -d gateway-service
 
-echo Waiting 30 seconds for API Gateway to start...
+echo Waiting 30 seconds for Gateway Service to start...
 timeout /t 30 /nobreak >nul
 echo.
 
@@ -56,14 +56,14 @@ echo ================================================
 echo.
 echo Service URLs:
 echo   Frontend:           http://localhost:3000
-echo   API Gateway:        http://localhost:8080
-echo   Swagger UI:         http://localhost:8080/swagger-ui.html
+echo   Gateway Service:    http://localhost:8080
+echo   API Docs:           http://localhost:8080/docs
 echo.
-echo   User Service:       http://localhost:8081
-echo   Catalog Service:    http://localhost:8082
-echo   Booking Service:    http://localhost:8083
-echo   Payment Service:    http://localhost:8084
-echo   Notification:       http://localhost:8085
+echo   User Service:       http://localhost:8081 (docs: /docs)
+echo   Catalog Service:    http://localhost:8082 (docs: /docs)
+echo   Booking Service:    http://localhost:8083 (docs: /docs)
+echo   Payment Service:    http://localhost:8084 (docs: /docs)
+echo   Notification:       http://localhost:8085 (docs: /docs)
 echo.
 echo Databases:
 echo   User DB:            localhost:5432

@@ -12,8 +12,8 @@ Before you begin, ensure you have the following installed:
 - **Git** - For cloning the repository
 
 ### Optional (for development)
-- **Java 17+** - For running services without Docker
-- **Maven 3.8+** - For building backend services
+- **Python 3.11+** - For running services without Docker
+- **Poetry 1.7+** - Python dependency management ([Install Poetry](https://python-poetry.org/docs/#installation))
 - **Node.js 18+** - For frontend development
 - **npm or pnpm** - For frontend dependencies
 
@@ -95,23 +95,23 @@ docker-compose ps
 ### Check Service Health
 
 ```bash
-# Check API Gateway health
-curl http://localhost:8080/actuator/health
+# Check Gateway Service health
+curl http://localhost:8080/health
 
 # Check User Service health
-curl http://localhost:8081/actuator/health
+curl http://localhost:8081/health
 
 # Check Catalog Service health
-curl http://localhost:8082/actuator/health
+curl http://localhost:8082/health
 
 # Check Booking Service health
-curl http://localhost:8083/actuator/health
+curl http://localhost:8083/health
 
 # Check Payment Service health
-curl http://localhost:8084/actuator/health
+curl http://localhost:8084/health
 
 # Check Notification Service health
-curl http://localhost:8085/actuator/health
+curl http://localhost:8085/health
 ```
 
 ### Access the Application
@@ -119,8 +119,13 @@ curl http://localhost:8085/actuator/health
 Open your browser and navigate to:
 
 - **Frontend**: http://localhost:3000
-- **API Gateway**: http://localhost:8080
-- **API Gateway Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Gateway Service**: http://localhost:8080
+- **Gateway Service API Docs**: http://localhost:8080/docs (FastAPI Swagger UI)
+- **User Service API Docs**: http://localhost:8081/docs
+- **Catalog Service API Docs**: http://localhost:8082/docs
+- **Booking Service API Docs**: http://localhost:8083/docs
+- **Payment Service API Docs**: http://localhost:8084/docs
+- **Notification Service API Docs**: http://localhost:8085/docs
 
 ## 📊 Access Databases
 
@@ -262,16 +267,56 @@ If you want to develop and debug backend services locally:
 # 1. Start only infrastructure with Docker
 docker-compose up -d user-db catalog-db booking-db payment-db notification-db redis zookeeper kafka
 
-# 2. Build the shared common module first
-cd shared/common
-mvn clean install
+# 2. Install the shared common module first
+cd backend/shared/common
+poetry install
 
-# 3. Build and run a specific service (e.g., User Service)
-cd ../../backend/user-service
-mvn clean install
-mvn spring-boot:run
+# 3. Install and run a specific service (e.g., User Service)
+cd ../../user-service
+poetry install
+
+# 4. Run database migrations
+poetry run alembic upgrade head
+
+# 5. Start the service
+poetry run uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload
 
 # The service will connect to Docker infrastructure (databases, Redis, Kafka)
+```
+
+### Python Development Tips
+
+```bash
+# Install dependencies
+poetry install
+
+# Add a new dependency
+poetry add fastapi
+
+# Add a dev dependency
+poetry add --group dev pytest
+
+# Run tests
+poetry run pytest
+
+# Run tests with coverage
+poetry run pytest --cov=app
+
+# Format code
+poetry run black app/
+poetry run ruff check app/ --fix
+
+# Type checking
+poetry run mypy app/
+
+# Create new migration
+poetry run alembic revision --autogenerate -m "migration message"
+
+# Apply migrations
+poetry run alembic upgrade head
+
+# Rollback migration
+poetry run alembic downgrade -1
 ```
 
 ### Running Frontend Locally (without Docker)
@@ -334,6 +379,9 @@ docker-compose restart user-service
 
 # Rebuild and restart a service
 docker-compose up -d --build user-service
+
+# Check if Python service has syntax errors
+docker-compose exec user-service python -m py_compile app/main.py
 ```
 
 ### Issue: Database Connection Errors
@@ -372,14 +420,47 @@ docker-compose restart zookeeper kafka
 ### Issue: Frontend Can't Connect to Backend
 
 ```bash
-# Check if API Gateway is running
-curl http://localhost:8080/actuator/health
+# Check if Gateway Service is running
+curl http://localhost:8080/health
 
 # Check frontend environment variables in docker-compose.yml
 # VITE_API_URL should be http://localhost:8080
 
 # Restart frontend
 docker-compose restart frontend
+```
+
+### Issue: Poetry/Python Dependency Errors
+
+```bash
+# Clear Poetry cache
+poetry cache clear pypi --all
+
+# Reinstall dependencies
+cd backend/user-service
+rm -rf .venv
+poetry install
+
+# If poetry.lock is corrupted
+rm poetry.lock
+poetry lock
+poetry install
+```
+
+### Issue: Alembic Migration Errors
+
+```bash
+# Check current migration version
+poetry run alembic current
+
+# View migration history
+poetry run alembic history
+
+# Stamp database to specific version
+poetry run alembic stamp head
+
+# Generate new migration (if autogenerate fails)
+poetry run alembic revision -m "manual migration"
 ```
 
 ## 🧹 Cleanup
@@ -441,10 +522,13 @@ After successfully running the application locally:
 - View all logs: `docker-compose logs -f`
 - Check container status: `docker-compose ps`
 - Restart everything: `docker-compose restart`
+- Python debugging: Add `import pdb; pdb.set_trace()` for breakpoints
+- FastAPI debugging: Access `/docs` endpoint for interactive API testing
 
 ## 📚 Additional Resources
 
 - [HLD.md](./HLD.md) - High-Level Design documentation
 - [LLD.md](./LLD.md) - Low-Level Design documentation
-- [TESTING.md](./TESTING.md) - Testing strategy and plans
+- [PYTHON_DEVELOPMENT.md](./PYTHON_DEVELOPMENT.md) - Python development guide
+- [PYTHON_MIGRATION_PLAN.md](./PYTHON_MIGRATION_PLAN.md) - Migration plan from Java to Python
 - [README.md](./README.md) - Project overview and architecture

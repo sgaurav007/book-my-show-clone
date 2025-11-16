@@ -133,32 +133,40 @@ services:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
-      - api-gateway
+      - gateway-service
     networks:
       - bookmyshow-network
 
-  # ==================== Microservices ====================
+  # ==================== Microservices (Python/FastAPI) ====================
 
-  api-gateway:
+  gateway-service:
     build:
       context: .
-      dockerfile: api-gateway/Dockerfile
-    container_name: api-gateway
+      dockerfile: backend/gateway-service/Dockerfile
+    container_name: gateway-service
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      USER_SERVICE_URL: http://user-service:8081
-      CATALOG_SERVICE_URL: http://catalog-service:8082
-      BOOKING_SERVICE_URL: http://booking-service:8083
-      PAYMENT_SERVICE_URL: http://payment-service:8084
+      - USER_SERVICE_URL=http://user-service:8081
+      - CATALOG_SERVICE_URL=http://catalog-service:8082
+      - BOOKING_SERVICE_URL=http://booking-service:8083
+      - PAYMENT_SERVICE_URL=http://payment-service:8084
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8085
+      - JWT_SECRET=bookmyshow-secret-key-for-jwt-token-generation-and-validation-must-be-at-least-256-bits
     depends_on:
       - user-service
       - catalog-service
       - booking-service
       - payment-service
+      - notification-service
     networks:
       - bookmyshow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
 
   user-service:
     build:
@@ -168,19 +176,22 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/user_service_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@user-db:5432/user_service_db
+      - REDIS_URL=redis://redis:6379/0
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - JWT_SECRET=bookmyshow-secret-key-for-jwt-token-generation-and-validation-must-be-at-least-256-bits
     depends_on:
       - user-db
       - redis
       - kafka
     networks:
       - bookmyshow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
 
   catalog-service:
     build:
@@ -190,19 +201,21 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://catalog-db:5432/catalog_service_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@catalog-db:5432/catalog_service_db
+      - REDIS_URL=redis://redis:6379/1
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
       - catalog-db
       - redis
       - kafka
     networks:
       - bookmyshow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
 
   booking-service:
     build:
@@ -212,14 +225,10 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://booking-db:5432/booking_service_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      CATALOG_SERVICE_URL: http://catalog-service:8082
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@booking-db:5432/booking_service_db
+      - REDIS_URL=redis://redis:6379/2
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - CATALOG_SERVICE_URL=http://catalog-service:8082
     depends_on:
       - booking-db
       - redis
@@ -227,6 +236,12 @@ services:
       - catalog-service
     networks:
       - bookmyshow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
 
   payment-service:
     build:
@@ -236,14 +251,10 @@ services:
     ports:
       - "8084:8084"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://payment-db:5432/payment_service_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      BOOKING_SERVICE_URL: http://booking-service:8083
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@payment-db:5432/payment_service_db
+      - REDIS_URL=redis://redis:6379/3
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - BOOKING_SERVICE_URL=http://booking-service:8083
     depends_on:
       - payment-db
       - redis
@@ -251,6 +262,12 @@ services:
       - booking-service
     networks:
       - bookmyshow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8084/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
 
   notification-service:
     build:
@@ -260,16 +277,19 @@ services:
     ports:
       - "8085:8085"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notification_service_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@notification-db:5432/notification_service_db
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
       - notification-db
       - kafka
     networks:
       - bookmyshow-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 40s
+      retries: 3
 
   # ==================== Monitoring (Optional) ====================
 

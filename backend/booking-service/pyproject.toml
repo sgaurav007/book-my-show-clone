@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "booking-service"
+version = "0.1.0"
+description = "Booking Service for BookMyShow Clone"
+authors = ["BookMyShow Team"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.35"}
+asyncpg = "^0.30.0"
+alembic = "^1.14.0"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.6.1"
+redis = {extras = ["hiredis"], version = "^5.2.0"}
+aiokafka = "^0.11.0"
+python-json-logger = "^3.1.0"
+httpx = "^0.28.0"
+
+# Shared common module
+common = {path = "../shared/common", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
+pytest-cov = "^6.0.0"
+httpx = "^0.28.0"
+pytest-mock = "^3.14.0"
+fakeredis = {extras = ["lua"], version = "^2.26.1"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=app --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["tests/*", "**/__pycache__/*"]

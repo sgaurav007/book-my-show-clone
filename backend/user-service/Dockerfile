@@ -1,25 +1,65 @@
-FROM maven:3.9.5-eclipse-temurin-17 AS build
+# Multi-stage Dockerfile for User Service
+
+# Stage 1: Builder - Install dependencies
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry==1.7.1
+
+# Copy poetry files
+COPY pyproject.toml poetry.lock* ./
+
+# Copy shared common package
+COPY ../../shared/common /build/shared/common
+
+# Configure Poetry to not create virtual environment
+RUN poetry config virtualenvs.create false
+
+# Export dependencies to requirements.txt
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+# Stage 2: Runtime
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy and build shared common module first
-COPY shared/common /app/shared/common
-WORKDIR /app/shared/common
-RUN mvn clean install -DskipTests
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy and build user service
-WORKDIR /app
-COPY backend/user-service/pom.xml ./user-service/pom.xml
-COPY backend/user-service/src ./user-service/src
-WORKDIR /app/user-service
-RUN mvn clean package -DskipTests
+# Copy requirements from builder
+COPY --from=builder /build/requirements.txt .
 
-FROM eclipse-temurin:17-jre-alpine
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /app
+# Copy shared common package
+COPY --from=builder /build/shared/common /app/shared/common
 
-COPY --from=build /app/user-service/target/*.jar app.jar
+# Install shared common package
+RUN pip install --no-cache-dir -e /app/shared/common
 
-EXPOSE 8081
+# Copy application code
+COPY app /app/app
+COPY alembic /app/alembic
+COPY alembic.ini /app/
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Create non-root user
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"
+
+# Run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

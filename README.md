@@ -1,12 +1,12 @@
 # BookMyShow Clone - Full-Stack Monorepo
 
-A production-ready, scalable ticket booking platform built with React (Remix) frontend and Spring Boot microservices backend, designed to handle millions of concurrent users.
+A production-ready, scalable ticket booking platform built with React (Remix) frontend and Python/FastAPI microservices backend, designed to handle millions of concurrent users.
 
 ## 🎯 Project Overview
 
 This is a complete full-stack implementation of BookMyShow featuring:
 - **Frontend**: React with Remix framework, TanStack libraries
-- **Backend**: Spring Boot microservices architecture
+- **Backend**: Python/FastAPI microservices architecture
 - **Infrastructure**: PostgreSQL, Redis, Kafka, Docker
 - **Observability**: Prometheus, Grafana, ELK stack
 
@@ -113,124 +113,107 @@ book-my-show-clone/
 │   ├── tsconfig.json
 │   └── Dockerfile
 │
-├── backend/                            # Spring Boot Microservices
-│   ├── api-gateway/                   # Spring Cloud Gateway
-│   │   ├── src/main/java/com/bookmyshow/gateway/
-│   │   │   ├── config/
-│   │   │   │   ├── GatewayConfig.java
-│   │   │   │   ├── SecurityConfig.java
-│   │   │   │   └── CorsConfig.java
-│   │   │   ├── filter/
-│   │   │   │   ├── AuthenticationFilter.java
-│   │   │   │   └── LoggingFilter.java
-│   │   │   └── GatewayApplication.java
-│   │   ├── src/main/resources/
-│   │   │   └── application.yml
-│   │   ├── pom.xml
+├── backend/                            # Python/FastAPI Microservices
+│   ├── shared/
+│   │   └── common/                    # Shared Python package
+│   │       ├── pyproject.toml
+│   │       ├── bookmyshow_common/
+│   │       │   ├── __init__.py
+│   │       │   ├── exceptions.py
+│   │       │   ├── models.py
+│   │       │   ├── schemas.py
+│   │       │   ├── database.py
+│   │       │   ├── redis_client.py
+│   │       │   ├── kafka_client.py
+│   │       │   ├── security.py
+│   │       │   └── middleware.py
+│   │       └── tests/
+│   │
+│   ├── gateway-service/               # FastAPI API Gateway
+│   │   ├── app/
+│   │   │   ├── __init__.py
+│   │   │   ├── main.py
+│   │   │   ├── config.py
+│   │   │   ├── routes.py
+│   │   │   └── middleware/
+│   │   ├── pyproject.toml
+│   │   ├── tests/
 │   │   └── Dockerfile
 │   │
 │   ├── user-service/                  # User Management
-│   │   ├── src/main/java/com/bookmyshow/user/
-│   │   │   ├── controller/
-│   │   │   │   └── UserController.java
-│   │   │   ├── service/
-│   │   │   │   ├── UserService.java
-│   │   │   │   └── AuthService.java
-│   │   │   ├── repository/
-│   │   │   │   ├── UserRepository.java
-│   │   │   │   └── RefreshTokenRepository.java
-│   │   │   ├── model/
-│   │   │   │   ├── User.java
-│   │   │   │   ├── RefreshToken.java
-│   │   │   │   └── UserAddress.java
-│   │   │   ├── dto/
-│   │   │   │   ├── UserRegistrationRequest.java
-│   │   │   │   ├── LoginRequest.java
-│   │   │   │   └── LoginResponse.java
+│   │   ├── app/
+│   │   │   ├── __init__.py
+│   │   │   ├── main.py
+│   │   │   ├── config.py
+│   │   │   ├── models/
+│   │   │   ├── schemas/
+│   │   │   ├── api/
+│   │   │   │   └── v1/
+│   │   │   ├── services/
+│   │   │   ├── repositories/
 │   │   │   ├── security/
-│   │   │   │   ├── JwtTokenProvider.java
-│   │   │   │   └── SecurityConfig.java
-│   │   │   ├── exception/
-│   │   │   │   └── GlobalExceptionHandler.java
-│   │   │   └── UserServiceApplication.java
-│   │   ├── src/main/resources/
-│   │   │   ├── application.yml
-│   │   │   └── db/migration/
-│   │   ├── pom.xml
+│   │   │   └── dependencies.py
+│   │   ├── alembic/
+│   │   ├── pyproject.toml
+│   │   ├── tests/
 │   │   └── Dockerfile
 │   │
 │   ├── catalog-service/               # Movies, Theaters, Shows
-│   │   ├── src/main/java/com/bookmyshow/catalog/
-│   │   │   ├── controller/
-│   │   │   │   ├── MovieController.java
-│   │   │   │   ├── TheaterController.java
-│   │   │   │   └── ShowController.java
-│   │   │   ├── service/
-│   │   │   │   ├── MovieService.java
-│   │   │   │   ├── TheaterService.java
-│   │   │   │   └── ShowService.java
-│   │   │   ├── repository/
-│   │   │   ├── model/
-│   │   │   │   ├── Movie.java
-│   │   │   │   ├── Theater.java
-│   │   │   │   ├── Screen.java
-│   │   │   │   ├── Seat.java
-│   │   │   │   └── Show.java
-│   │   │   ├── dto/
-│   │   │   └── CatalogServiceApplication.java
-│   │   ├── src/main/resources/
-│   │   ├── pom.xml
+│   │   ├── app/
+│   │   │   ├── __init__.py
+│   │   │   ├── main.py
+│   │   │   ├── models/
+│   │   │   ├── schemas/
+│   │   │   ├── api/
+│   │   │   ├── services/
+│   │   │   └── repositories/
+│   │   ├── alembic/
+│   │   ├── pyproject.toml
+│   │   ├── tests/
 │   │   └── Dockerfile
 │   │
 │   ├── booking-service/               # Ticket Bookings
-│   │   ├── src/main/java/com/bookmyshow/booking/
-│   │   │   ├── controller/
-│   │   │   │   └── BookingController.java
-│   │   │   ├── service/
-│   │   │   │   ├── BookingService.java
-│   │   │   │   └── SeatLockService.java
-│   │   │   ├── repository/
-│   │   │   ├── model/
-│   │   │   │   ├── Booking.java
-│   │   │   │   └── BookingSeat.java
-│   │   │   ├── kafka/
-│   │   │   │   └── BookingEventProducer.java
-│   │   │   └── BookingServiceApplication.java
-│   │   ├── src/main/resources/
-│   │   ├── pom.xml
+│   │   ├── app/
+│   │   │   ├── __init__.py
+│   │   │   ├── main.py
+│   │   │   ├── models/
+│   │   │   ├── schemas/
+│   │   │   ├── api/
+│   │   │   ├── services/
+│   │   │   └── kafka/
+│   │   ├── alembic/
+│   │   ├── pyproject.toml
+│   │   ├── tests/
 │   │   └── Dockerfile
 │   │
 │   ├── payment-service/               # Payment Processing
-│   │   ├── src/main/java/com/bookmyshow/payment/
-│   │   │   ├── controller/
-│   │   │   │   ├── PaymentController.java
-│   │   │   │   └── WebhookController.java
-│   │   │   ├── service/
-│   │   │   │   ├── PaymentService.java
-│   │   │   │   └── RefundService.java
-│   │   │   ├── gateway/
-│   │   │   │   ├── StripeGatewayAdapter.java
-│   │   │   │   └── RazorpayGatewayAdapter.java
-│   │   │   └── PaymentServiceApplication.java
-│   │   ├── src/main/resources/
-│   │   ├── pom.xml
+│   │   ├── app/
+│   │   │   ├── __init__.py
+│   │   │   ├── main.py
+│   │   │   ├── models/
+│   │   │   ├── schemas/
+│   │   │   ├── api/
+│   │   │   ├── services/
+│   │   │   └── gateways/
+│   │   ├── alembic/
+│   │   ├── pyproject.toml
+│   │   ├── tests/
 │   │   └── Dockerfile
 │   │
 │   └── notification-service/          # Email/SMS Notifications
-│       ├── src/main/java/com/bookmyshow/notification/
+│       ├── app/
+│       │   ├── __init__.py
+│       │   ├── main.py
+│       │   ├── models/
+│       │   ├── schemas/
 │       │   ├── kafka/
-│       │   │   └── NotificationConsumer.java
-│       │   ├── service/
-│       │   │   ├── EmailService.java
-│       │   │   └── SmsService.java
-│       │   └── NotificationServiceApplication.java
-│       ├── src/main/resources/
-│       ├── pom.xml
+│       │   └── services/
+│       ├── alembic/
+│       ├── pyproject.toml
+│       ├── tests/
 │       └── Dockerfile
 │
 ├── shared/                            # Shared configurations
-│   ├── common/                        # Common utilities
-│   │   └── pom.xml
 │   └── types/                         # TypeScript types (shared)
 │       └── api.types.ts
 │
@@ -383,15 +366,15 @@ const form = useForm({
 
 ### Microservices
 
-| Service | Port | Database | Purpose |
-|---------|------|----------|---------|
-| Frontend | 3000 | - | React Remix App |
-| API Gateway | 8080 | - | Routing, Auth |
-| User Service | 8081 | user_service_db | Authentication, Profiles |
-| Catalog Service | 8082 | catalog_service_db | Movies, Theaters, Shows |
-| Booking Service | 8083 | booking_service_db | Ticket Bookings |
-| Payment Service | 8084 | payment_service_db | Payments, Refunds |
-| Notification Service | 8085 | notification_service_db | Email, SMS |
+| Service | Port | Database | Technology | Purpose |
+|---------|------|----------|-----------|---------|
+| Frontend | 3000 | - | React Remix | User Interface |
+| Gateway Service | 8080 | - | FastAPI | API Gateway, Routing |
+| User Service | 8081 | user_service_db | FastAPI + PostgreSQL | Authentication, Profiles |
+| Catalog Service | 8082 | catalog_service_db | FastAPI + PostgreSQL | Movies, Theaters, Shows |
+| Booking Service | 8083 | booking_service_db | FastAPI + PostgreSQL | Ticket Bookings |
+| Payment Service | 8084 | payment_service_db | FastAPI + PostgreSQL | Payments, Refunds |
+| Notification Service | 8085 | notification_service_db | FastAPI + PostgreSQL | Email, SMS |
 
 ### Infrastructure
 
@@ -413,8 +396,8 @@ const form = useForm({
 ### Prerequisites
 
 - **Node.js** 18+
-- **Java** 17+
-- **Maven** 3.8+
+- **Python** 3.11+
+- **Poetry** 1.7+ (Python dependency manager)
 - **Docker** & Docker Compose
 - **Git**
 
@@ -432,38 +415,28 @@ cd book-my-show-clone
 docker-compose up -d user-db catalog-db booking-db payment-db notification-db redis zookeeper kafka
 ```
 
-### 3. Build Backend Services
+### 3. Start Backend Services
 
 ```bash
-cd backend
-./mvnw clean install -DskipTests
-
-# Or use the script
-./scripts/build-all.sh
+# Start all backend services (Docker will build them automatically)
+docker-compose up -d gateway-service user-service catalog-service booking-service payment-service notification-service
 ```
 
-### 4. Start Backend Services
-
-```bash
-# Start all backend services
-docker-compose up -d api-gateway user-service catalog-service booking-service payment-service notification-service
-```
-
-### 5. Setup Frontend
+### 4. Setup Frontend
 
 ```bash
 cd frontend
 npm install
 ```
 
-### 6. Start Frontend (Development)
+### 5. Start Frontend (Development)
 
 ```bash
 npm run dev
 # Frontend runs on http://localhost:3000
 ```
 
-### 7. Start Everything at Once
+### 6. Start Everything at Once
 
 ```bash
 # From root directory
@@ -616,9 +589,13 @@ npm run test:coverage     # Coverage report
 ### Backend Tests
 ```bash
 cd backend
-./mvnw test              # Unit tests
-./mvnw verify            # Integration tests
-./mvnw jacoco:report     # Coverage report
+# Test all services
+./scripts/run_tests.sh
+
+# Test individual service
+cd user-service
+poetry run pytest
+poetry run pytest --cov=app --cov-report=html
 ```
 
 ### Load Testing
@@ -631,7 +608,8 @@ cd backend
 ### Access Dashboards
 
 - **Frontend**: http://localhost:3000
-- **API Gateway**: http://localhost:8080
+- **Gateway Service**: http://localhost:8080
+- **Gateway Docs**: http://localhost:8080/docs (FastAPI Swagger)
 - **Grafana**: http://localhost:3001 (admin/admin)
 - **Prometheus**: http://localhost:9090
 - **Kibana**: http://localhost:5601
@@ -639,10 +617,10 @@ cd backend
 ### Key Metrics
 
 - Request rate, latency, errors (RED metrics)
-- JVM metrics (heap, GC)
-- Database connection pool
+- Python process metrics (memory, CPU)
+- Database connection pool (SQLAlchemy)
 - Kafka lag
-- Cache hit ratio
+- Redis cache hit ratio
 - Seat lock success rate
 
 ## 🚢 Deployment
@@ -696,18 +674,12 @@ VITE_APP_NAME=BookMyShow
 VITE_GOOGLE_CLIENT_ID=xxx
 ```
 
-### Backend (application.yml)
-```yaml
-spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+### Backend (Python .env)
+```env
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/user_service_db
+REDIS_URL=redis://localhost:6379/0
+KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+JWT_SECRET=your-secret-key-here
 ```
 
 ## 📈 Performance Targets
@@ -726,7 +698,8 @@ kafka:
 ### Code Style
 - Follow [claude.md](./claude.md) guidelines
 - Use ESLint + Prettier (Frontend)
-- Use Checkstyle (Backend)
+- Use Black + Ruff (Backend Python)
+- Use MyPy for type checking
 - Write meaningful commit messages
 
 ### Git Workflow
@@ -746,6 +719,9 @@ git push origin feature/amazing-feature
 
 - [HLD.md](./HLD.md) - High-Level Design
 - [LLD.md](./LLD.md) - Low-Level Design
+- [LOCAL_SETUP.md](./LOCAL_SETUP.md) - Local Setup Guide
+- [PYTHON_DEVELOPMENT.md](./PYTHON_DEVELOPMENT.md) - Python Development Guide
+- [PYTHON_MIGRATION_PLAN.md](./PYTHON_MIGRATION_PLAN.md) - Migration Plan
 - [claude.md](./claude.md) - Development Rules
 - [API Documentation](./docs/api/)
 - [Deployment Guide](./docs/deployment/)
@@ -772,7 +748,8 @@ MIT License - See [LICENSE](LICENSE)
 
 - Remix team for excellent framework
 - TanStack for amazing libraries
-- Spring Boot team
+- FastAPI team for the excellent framework
+- Python community
 - BookMyShow for inspiration
 
 ---
@@ -788,4 +765,4 @@ For issues and questions:
 
 ---
 
-Built with ❤️ using React, Remix, Spring Boot, and TanStack
+Built with ❤️ using React, Remix, Python, FastAPI, and TanStack

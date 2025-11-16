@@ -1,37 +1,63 @@
-# Multi-stage build for Booking Service
-FROM maven:3.9.5-eclipse-temurin-17 AS build
+# Multi-stage build for Python FastAPI service
+
+# Stage 1: Builder
+FROM python:3.11-slim as builder
+
+WORKDIR /build
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry==1.8.2
+
+# Copy dependency files
+COPY pyproject.toml poetry.lock* ./
+
+# Copy shared common module
+COPY ../shared/common /build/shared/common
+
+# Configure poetry to not create virtual environment
+RUN poetry config virtualenvs.create false
+
+# Install dependencies
+RUN poetry install --no-dev --no-interaction --no-ansi
+
+# Stage 2: Runtime
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy shared common module first
-COPY shared/common /app/shared/common
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 
-# Build shared module
-WORKDIR /app/shared/common
-RUN mvn clean install -DskipTests
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy booking service
-WORKDIR /app/booking-service
-COPY backend/booking-service/pom.xml .
-COPY backend/booking-service/src ./src
+# Copy shared common module
+COPY --from=builder /build/shared/common /app/shared/common
 
-# Build booking service
-RUN mvn clean package -DskipTests
+# Copy application code
+COPY app /app/app
+COPY alembic /app/alembic
+COPY alembic.ini /app/alembic.ini
 
-# Runtime stage
-FROM eclipse-temurin:17-jre-alpine
-
-WORKDIR /app
-
-# Copy the built JAR from build stage
-COPY --from=build /app/booking-service/target/booking-service-1.0.0.jar app.jar
+# Create non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
 
 # Expose port
 EXPOSE 8082
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8082/actuator/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8082/health')" || exit 1
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8082"]

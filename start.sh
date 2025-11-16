@@ -102,12 +102,12 @@ docker-compose up -d user-service catalog-service booking-service payment-servic
 echo -e "${YELLOW}Waiting 60 seconds for services to start...${NC}"
 sleep 60
 
-# Step 5: Start API Gateway
+# Step 5: Start Gateway Service
 echo ""
-echo -e "${BLUE}Step 3/4: Starting API Gateway...${NC}"
-docker-compose up -d api-gateway
+echo -e "${BLUE}Step 3/4: Starting Gateway Service...${NC}"
+docker-compose up -d gateway-service
 
-echo -e "${YELLOW}Waiting 30 seconds for API Gateway to start...${NC}"
+echo -e "${YELLOW}Waiting 30 seconds for Gateway Service to start...${NC}"
 sleep 30
 
 # Step 6: Start frontend
@@ -123,12 +123,12 @@ echo ""
 echo -e "${BLUE}Verifying services...${NC}"
 echo ""
 
-wait_for_service "API Gateway" "http://localhost:8080/actuator/health" || true
-wait_for_service "User Service" "http://localhost:8081/actuator/health" || true
-wait_for_service "Catalog Service" "http://localhost:8082/actuator/health" || true
-wait_for_service "Booking Service" "http://localhost:8083/actuator/health" || true
-wait_for_service "Payment Service" "http://localhost:8084/actuator/health" || true
-wait_for_service "Notification Service" "http://localhost:8085/actuator/health" || true
+wait_for_service "Gateway Service" "http://localhost:8080/health" || true
+wait_for_service "User Service" "http://localhost:8081/health" || true
+wait_for_service "Catalog Service" "http://localhost:8082/health" || true
+wait_for_service "Booking Service" "http://localhost:8083/health" || true
+wait_for_service "Payment Service" "http://localhost:8084/health" || true
+wait_for_service "Notification Service" "http://localhost:8085/health" || true
 
 # Step 8: Show status
 echo ""
@@ -138,14 +138,14 @@ echo "================================================"
 echo ""
 echo "📊 Service URLs:"
 echo "  Frontend:           http://localhost:3000"
-echo "  API Gateway:        http://localhost:8080"
-echo "  Swagger UI:         http://localhost:8080/swagger-ui.html"
+echo "  Gateway Service:    http://localhost:8080"
+echo "  API Docs:           http://localhost:8080/docs"
 echo ""
-echo "  User Service:       http://localhost:8081"
-echo "  Catalog Service:    http://localhost:8082"
-echo "  Booking Service:    http://localhost:8083"
-echo "  Payment Service:    http://localhost:8084"
-echo "  Notification:       http://localhost:8085"
+echo "  User Service:       http://localhost:8081 (docs: /docs)"
+echo "  Catalog Service:    http://localhost:8082 (docs: /docs)"
+echo "  Booking Service:    http://localhost:8083 (docs: /docs)"
+echo "  Payment Service:    http://localhost:8084 (docs: /docs)"
+echo "  Notification:       http://localhost:8085 (docs: /docs)"
 echo ""
 echo "🗄️  Databases:"
 echo "  User DB:            localhost:5432"
