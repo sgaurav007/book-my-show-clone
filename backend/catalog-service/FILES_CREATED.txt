@@ -1,0 +1,85 @@
+CATALOG SERVICE - FILES CREATED (42 Total)
+===========================================
+
+JAVA SOURCE FILES (22)
+----------------------
+
+Controllers (3):
+1. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/controller/MovieController.java
+2. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/controller/TheaterController.java
+3. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/controller/ShowController.java
+
+DTOs (4):
+4. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/dto/CreateMovieRequest.java
+5. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/dto/UpdateMovieRequest.java
+6. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/dto/CreateTheaterRequest.java
+7. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/dto/CreateShowRequest.java
+
+Entities (5):
+8. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/entity/Movie.java
+9. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/entity/Theater.java
+10. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/entity/Screen.java
+11. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/entity/Seat.java
+12. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/entity/Show.java
+
+Repositories (5):
+13. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/repository/MovieRepository.java
+14. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/repository/TheaterRepository.java
+15. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/repository/ScreenRepository.java
+16. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/repository/SeatRepository.java
+17. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/repository/ShowRepository.java
+
+Services (4):
+18. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/service/MovieService.java
+19. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/service/TheaterService.java
+20. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/service/ShowService.java
+21. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/service/SeatService.java
+
+Application (1):
+22. /home/user/book-my-show-clone/backend/catalog-service/src/main/java/com/bookmyshow/catalog/CatalogServiceApplication.java
+
+
+TEST FILES (7)
+--------------
+
+Service Tests (3):
+23. /home/user/book-my-show-clone/backend/catalog-service/src/test/java/com/bookmyshow/catalog/service/MovieServiceTest.java
+24. /home/user/book-my-show-clone/backend/catalog-service/src/test/java/com/bookmyshow/catalog/service/TheaterServiceTest.java
+25. /home/user/book-my-show-clone/backend/catalog-service/src/test/java/com/bookmyshow/catalog/service/ShowServiceTest.java
+
+Controller Tests (3):
+26. /home/user/book-my-show-clone/backend/catalog-service/src/test/java/com/bookmyshow/catalog/controller/MovieControllerTest.java
+27. /home/user/book-my-show-clone/backend/catalog-service/src/test/java/com/bookmyshow/catalog/controller/TheaterControllerTest.java
+28. /home/user/book-my-show-clone/backend/catalog-service/src/test/java/com/bookmyshow/catalog/controller/ShowControllerTest.java
+
+Integration Tests (1):
+29. /home/user/book-my-show-clone/backend/catalog-service/src/test/java/com/bookmyshow/catalog/integration/CatalogServiceIntegrationTest.java
+
+
+DATABASE MIGRATIONS (7)
+-----------------------
+
+30. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/db/migration/V1__create_movies.sql
+31. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/db/migration/V2__create_movie_genres.sql
+32. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/db/migration/V3__create_theaters.sql
+33. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/db/migration/V4__create_screens.sql
+34. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/db/migration/V5__create_seats.sql
+35. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/db/migration/V6__create_shows.sql
+36. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/db/migration/V7__insert_test_data.sql
+
+
+CONFIGURATION FILES (4)
+-----------------------
+
+37. /home/user/book-my-show-clone/backend/catalog-service/pom.xml
+38. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/application.yml
+39. /home/user/book-my-show-clone/backend/catalog-service/src/main/resources/application-test.yml
+40. /home/user/book-my-show-clone/backend/catalog-service/Dockerfile
+
+
+DOCUMENTATION (2)
+-----------------
+
+41. /home/user/book-my-show-clone/backend/catalog-service/README.md
+42. /home/user/book-my-show-clone/backend/catalog-service/DELIVERY_SUMMARY.md
+

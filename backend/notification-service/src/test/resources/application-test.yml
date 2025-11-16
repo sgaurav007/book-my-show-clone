@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: notification-service-test
+
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-test
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: >
+          bookingConfirmed:com.bookmyshow.notification.dto.BookingConfirmedEvent,
+          bookingCancelled:com.bookmyshow.notification.dto.BookingCancelledEvent,
+          paymentSuccess:com.bookmyshow.notification.dto.PaymentSuccessEvent,
+          paymentFailed:com.bookmyshow.notification.dto.PaymentFailedEvent
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+logging:
+  level:
+    root: INFO
+    com.bookmyshow.notification: DEBUG
+    org.springframework.kafka: WARN
+    org.hibernate.SQL: DEBUG
+
+awaitility:
+  timeout: 10
+  poll-interval: 100

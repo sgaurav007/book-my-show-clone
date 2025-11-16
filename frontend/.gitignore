@@ -1,0 +1,11 @@
+node_modules
+
+/.cache
+/build
+.env
+.env.local
+
+/playwright-report/
+/playwright/.cache/
+/test-results/
+/coverage/
