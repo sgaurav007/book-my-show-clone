@@ -164,7 +164,7 @@ services:
 
   user-service:
     build:
-      context: ./user-service
+      context: ./backend/user-service
       dockerfile: Dockerfile
     container_name: user-service
     ports:
@@ -186,7 +186,7 @@ services:
 
   catalog-service:
     build:
-      context: ./catalog-service
+      context: ./backend/catalog-service
       dockerfile: Dockerfile
     container_name: catalog-service
     ports:
@@ -208,7 +208,7 @@ services:
 
   booking-service:
     build:
-      context: ./booking-service
+      context: ./backend/booking-service
       dockerfile: Dockerfile
     container_name: booking-service
     ports:
@@ -232,7 +232,7 @@ services:
 
   payment-service:
     build:
-      context: ./payment-service
+      context: ./backend/payment-service
       dockerfile: Dockerfile
     container_name: payment-service
     ports:
@@ -256,7 +256,7 @@ services:
 
   notification-service:
     build:
-      context: ./notification-service
+      context: ./backend/notification-service
       dockerfile: Dockerfile
     container_name: notification-service
     ports:
@@ -295,7 +295,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin

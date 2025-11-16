@@ -10,6 +10,46 @@ This is a complete full-stack implementation of BookMyShow featuring:
 - **Infrastructure**: PostgreSQL, Redis, Kafka, Docker
 - **Observability**: Prometheus, Grafana, ELK stack
 
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose installed
+- 8GB+ RAM available
+- Ports 3000, 8080-8085, 5432-5436, 6379, 9092 available
+
+### Run Locally (Easy Mode)
+
+**Linux/Mac:**
+```bash
+./start.sh
+```
+
+**Windows:**
+```cmd
+start.bat
+```
+
+**Or manually with Docker Compose:**
+```bash
+docker-compose up -d
+```
+
+Then open http://localhost:3000 in your browser.
+
+### Stop the Application
+
+**Linux/Mac:**
+```bash
+./stop.sh
+```
+
+**Windows:**
+```cmd
+stop.bat
+```
+
+For detailed setup instructions, troubleshooting, and development mode, see **[LOCAL_SETUP.md](./LOCAL_SETUP.md)**.
+
 ## 🏗️ Monorepo Structure
 
 ```
