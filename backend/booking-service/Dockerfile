@@ -4,7 +4,7 @@ FROM maven:3.9.5-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy shared common module first
-COPY ../../shared/common /app/shared/common
+COPY shared/common /app/shared/common
 
 # Build shared module
 WORKDIR /app/shared/common
@@ -12,8 +12,8 @@ RUN mvn clean install -DskipTests
 
 # Copy booking service
 WORKDIR /app/booking-service
-COPY pom.xml .
-COPY src ./src
+COPY backend/booking-service/pom.xml .
+COPY backend/booking-service/src ./src
 
 # Build booking service
 RUN mvn clean package -DskipTests

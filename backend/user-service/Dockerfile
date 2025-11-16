@@ -2,8 +2,8 @@ FROM eclipse-temurin:17-jdk-alpine AS build
 
 WORKDIR /app
 
-COPY pom.xml .
-COPY src ./src
+COPY backend/user-service/pom.xml .
+COPY backend/user-service/src ./src
 
 RUN apk add --no-cache maven
 
