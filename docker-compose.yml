@@ -118,6 +118,27 @@ services:
     networks:
       - bookmyshow-network
 
+  # ==================== Frontend ====================
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:8080
+      VITE_APP_NAME: BookMyShow
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api-gateway
+    networks:
+      - bookmyshow-network
+
   # ==================== Microservices ====================
 
   api-gateway:

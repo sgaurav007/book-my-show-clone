@@ -1,392 +1,751 @@
-# BookMyShow Clone - Microservices Architecture
+# BookMyShow Clone - Full-Stack Monorepo
 
-A production-ready, scalable ticket booking system built with Spring Boot microservices, designed to handle millions of concurrent users.
+A production-ready, scalable ticket booking platform built with React (Remix) frontend and Spring Boot microservices backend, designed to handle millions of concurrent users.
 
-## Architecture Overview
+## 🎯 Project Overview
 
-This project implements a complete microservices architecture with:
-- 5 independent microservices (User, Catalog, Booking, Payment, Notification)
-- API Gateway for routing and authentication
-- Separate PostgreSQL database for each service
-- Redis for distributed locking and caching
-- Apache Kafka for event-driven communication
-- Complete observability stack (Prometheus, Grafana, ELK)
+This is a complete full-stack implementation of BookMyShow featuring:
+- **Frontend**: React with Remix framework, TanStack libraries
+- **Backend**: Spring Boot microservices architecture
+- **Infrastructure**: PostgreSQL, Redis, Kafka, Docker
+- **Observability**: Prometheus, Grafana, ELK stack
 
-## Tech Stack
-
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| Backend | Spring Boot 3.x | Microservices framework |
-| API Gateway | Spring Cloud Gateway | API routing and security |
-| Databases | PostgreSQL 15 | One database per service |
-| Cache & Locks | Redis 7 | Distributed locks and caching |
-| Message Queue | Apache Kafka | Event streaming |
-| Monitoring | Prometheus + Grafana | Metrics and dashboards |
-| Logging | ELK Stack | Centralized logging |
-| Containerization | Docker Compose | Local orchestration |
-| Production | Kubernetes | Cloud deployment |
-
-## Services Architecture
+## 🏗️ Monorepo Structure
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  API Gateway :8080                   │
-└──────┬────────┬─────────┬─────────┬─────────────────┘
-       │        │         │         │
-       ▼        ▼         ▼         ▼
-┌──────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│  User    │ │Catalog │ │Booking │ │Payment │
-│  :8081   │ │ :8082  │ │ :8083  │ │ :8084  │
-└────┬─────┘ └───┬────┘ └───┬────┘ └───┬────┘
-     │           │           │           │
-┌────▼───────────▼───────────▼───────────▼────┐
-│          Notification Service :8085          │
-└──────────────────────────────────────────────┘
-
-Infrastructure:
-- 5 PostgreSQL databases (one per service)
-- Redis (distributed locks & cache)
-- Kafka (event streaming)
+book-my-show-clone/
+│
+├── frontend/                           # React Remix Application
+│   ├── app/
+│   │   ├── routes/                     # Remix file-based routing
+│   │   │   ├── _index.tsx             # Home page
+│   │   │   ├── movies/
+│   │   │   │   ├── $movieId.tsx       # Movie details
+│   │   │   │   └── index.tsx          # Movies list
+│   │   │   ├── theaters/
+│   │   │   │   └── index.tsx          # Theaters list
+│   │   │   ├── booking/
+│   │   │   │   ├── $showId.tsx        # Seat selection
+│   │   │   │   └── confirm.tsx        # Booking confirmation
+│   │   │   ├── payment/
+│   │   │   │   ├── index.tsx          # Payment page
+│   │   │   │   └── success.tsx        # Payment success
+│   │   │   ├── profile/
+│   │   │   │   ├── index.tsx          # User profile
+│   │   │   │   └── bookings.tsx       # My bookings
+│   │   │   ├── auth/
+│   │   │   │   ├── login.tsx          # Login
+│   │   │   │   └── register.tsx       # Register
+│   │   │   └── admin/                 # Admin routes
+│   │   │       ├── movies.tsx
+│   │   │       ├── theaters.tsx
+│   │   │       └── shows.tsx
+│   │   ├── components/                # React components
+│   │   │   ├── ui/                    # shadcn/ui components
+│   │   │   ├── MovieCard.tsx
+│   │   │   ├── SeatLayout.tsx
+│   │   │   ├── TheaterCard.tsx
+│   │   │   ├── BookingCard.tsx
+│   │   │   └── PaymentForm.tsx
+│   │   ├── services/                  # API services
+│   │   │   ├── api.ts                 # Axios/Fetch client
+│   │   │   ├── auth.ts
+│   │   │   ├── movies.ts
+│   │   │   ├── bookings.ts
+│   │   │   └── payments.ts
+│   │   ├── hooks/                     # TanStack Query hooks
+│   │   │   ├── useMovies.ts
+│   │   │   ├── useTheaters.ts
+│   │   │   ├── useBooking.ts
+│   │   │   └── useAuth.ts
+│   │   ├── utils/
+│   │   │   ├── auth.ts
+│   │   │   ├── constants.ts
+│   │   │   └── helpers.ts
+│   │   ├── root.tsx                   # Root component
+│   │   └── entry.client.tsx
+│   ├── public/
+│   │   ├── images/
+│   │   └── icons/
+│   ├── package.json
+│   ├── remix.config.js
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   └── Dockerfile
+│
+├── backend/                            # Spring Boot Microservices
+│   ├── api-gateway/                   # Spring Cloud Gateway
+│   │   ├── src/main/java/com/bookmyshow/gateway/
+│   │   │   ├── config/
+│   │   │   │   ├── GatewayConfig.java
+│   │   │   │   ├── SecurityConfig.java
+│   │   │   │   └── CorsConfig.java
+│   │   │   ├── filter/
+│   │   │   │   ├── AuthenticationFilter.java
+│   │   │   │   └── LoggingFilter.java
+│   │   │   └── GatewayApplication.java
+│   │   ├── src/main/resources/
+│   │   │   └── application.yml
+│   │   ├── pom.xml
+│   │   └── Dockerfile
+│   │
+│   ├── user-service/                  # User Management
+│   │   ├── src/main/java/com/bookmyshow/user/
+│   │   │   ├── controller/
+│   │   │   │   └── UserController.java
+│   │   │   ├── service/
+│   │   │   │   ├── UserService.java
+│   │   │   │   └── AuthService.java
+│   │   │   ├── repository/
+│   │   │   │   ├── UserRepository.java
+│   │   │   │   └── RefreshTokenRepository.java
+│   │   │   ├── model/
+│   │   │   │   ├── User.java
+│   │   │   │   ├── RefreshToken.java
+│   │   │   │   └── UserAddress.java
+│   │   │   ├── dto/
+│   │   │   │   ├── UserRegistrationRequest.java
+│   │   │   │   ├── LoginRequest.java
+│   │   │   │   └── LoginResponse.java
+│   │   │   ├── security/
+│   │   │   │   ├── JwtTokenProvider.java
+│   │   │   │   └── SecurityConfig.java
+│   │   │   ├── exception/
+│   │   │   │   └── GlobalExceptionHandler.java
+│   │   │   └── UserServiceApplication.java
+│   │   ├── src/main/resources/
+│   │   │   ├── application.yml
+│   │   │   └── db/migration/
+│   │   ├── pom.xml
+│   │   └── Dockerfile
+│   │
+│   ├── catalog-service/               # Movies, Theaters, Shows
+│   │   ├── src/main/java/com/bookmyshow/catalog/
+│   │   │   ├── controller/
+│   │   │   │   ├── MovieController.java
+│   │   │   │   ├── TheaterController.java
+│   │   │   │   └── ShowController.java
+│   │   │   ├── service/
+│   │   │   │   ├── MovieService.java
+│   │   │   │   ├── TheaterService.java
+│   │   │   │   └── ShowService.java
+│   │   │   ├── repository/
+│   │   │   ├── model/
+│   │   │   │   ├── Movie.java
+│   │   │   │   ├── Theater.java
+│   │   │   │   ├── Screen.java
+│   │   │   │   ├── Seat.java
+│   │   │   │   └── Show.java
+│   │   │   ├── dto/
+│   │   │   └── CatalogServiceApplication.java
+│   │   ├── src/main/resources/
+│   │   ├── pom.xml
+│   │   └── Dockerfile
+│   │
+│   ├── booking-service/               # Ticket Bookings
+│   │   ├── src/main/java/com/bookmyshow/booking/
+│   │   │   ├── controller/
+│   │   │   │   └── BookingController.java
+│   │   │   ├── service/
+│   │   │   │   ├── BookingService.java
+│   │   │   │   └── SeatLockService.java
+│   │   │   ├── repository/
+│   │   │   ├── model/
+│   │   │   │   ├── Booking.java
+│   │   │   │   └── BookingSeat.java
+│   │   │   ├── kafka/
+│   │   │   │   └── BookingEventProducer.java
+│   │   │   └── BookingServiceApplication.java
+│   │   ├── src/main/resources/
+│   │   ├── pom.xml
+│   │   └── Dockerfile
+│   │
+│   ├── payment-service/               # Payment Processing
+│   │   ├── src/main/java/com/bookmyshow/payment/
+│   │   │   ├── controller/
+│   │   │   │   ├── PaymentController.java
+│   │   │   │   └── WebhookController.java
+│   │   │   ├── service/
+│   │   │   │   ├── PaymentService.java
+│   │   │   │   └── RefundService.java
+│   │   │   ├── gateway/
+│   │   │   │   ├── StripeGatewayAdapter.java
+│   │   │   │   └── RazorpayGatewayAdapter.java
+│   │   │   └── PaymentServiceApplication.java
+│   │   ├── src/main/resources/
+│   │   ├── pom.xml
+│   │   └── Dockerfile
+│   │
+│   └── notification-service/          # Email/SMS Notifications
+│       ├── src/main/java/com/bookmyshow/notification/
+│       │   ├── kafka/
+│       │   │   └── NotificationConsumer.java
+│       │   ├── service/
+│       │   │   ├── EmailService.java
+│       │   │   └── SmsService.java
+│       │   └── NotificationServiceApplication.java
+│       ├── src/main/resources/
+│       ├── pom.xml
+│       └── Dockerfile
+│
+├── shared/                            # Shared configurations
+│   ├── common/                        # Common utilities
+│   │   └── pom.xml
+│   └── types/                         # TypeScript types (shared)
+│       └── api.types.ts
+│
+├── infrastructure/                    # Infrastructure configs
+│   ├── k8s/                          # Kubernetes manifests
+│   │   ├── namespace.yaml
+│   │   ├── configmap.yaml
+│   │   ├── secrets.yaml
+│   │   ├── deployments/
+│   │   │   ├── frontend.yaml
+│   │   │   ├── api-gateway.yaml
+│   │   │   ├── user-service.yaml
+│   │   │   ├── catalog-service.yaml
+│   │   │   ├── booking-service.yaml
+│   │   │   ├── payment-service.yaml
+│   │   │   └── notification-service.yaml
+│   │   ├── services/
+│   │   ├── ingress.yaml
+│   │   └── hpa.yaml
+│   │
+│   ├── terraform/                    # Infrastructure as Code
+│   │   ├── azure/
+│   │   │   ├── main.tf
+│   │   │   ├── variables.tf
+│   │   │   └── outputs.tf
+│   │   └── modules/
+│   │
+│   └── helm/                         # Helm charts
+│       └── bookmyshow/
+│           ├── Chart.yaml
+│           ├── values.yaml
+│           └── templates/
+│
+├── monitoring/                        # Observability
+│   ├── prometheus/
+│   │   ├── prometheus.yml
+│   │   └── rules/
+│   ├── grafana/
+│   │   ├── dashboards/
+│   │   │   ├── services.json
+│   │   │   ├── jvm.json
+│   │   │   └── kafka.json
+│   │   └── datasources/
+│   └── logstash/
+│       └── logstash.conf
+│
+├── docs/                             # Documentation
+│   ├── api/
+│   │   ├── user-service.md
+│   │   ├── catalog-service.md
+│   │   ├── booking-service.md
+│   │   └── payment-service.md
+│   ├── architecture/
+│   │   ├── diagrams/
+│   │   └── decisions/
+│   └── deployment/
+│       ├── local.md
+│       ├── azure.md
+│       └── aws.md
+│
+├── scripts/                          # Utility scripts
+│   ├── build-all.sh
+│   ├── start-dev.sh
+│   ├── run-tests.sh
+│   └── deploy.sh
+│
+├── docker-compose.yml                # Local development
+├── docker-compose.monitoring.yml     # Monitoring stack
+├── docker-compose.prod.yml           # Production-like setup
+│
+├── HLD.md                            # High-Level Design
+├── LLD.md                            # Low-Level Design
+├── claude.md                         # Development rules
+├── .gitignore
+├── README.md                         # This file
+└── LICENSE
 ```
 
-## Database Architecture
+## 🎨 Frontend Architecture
 
-Each service has its own isolated database following microservices best practices:
+### Tech Stack
+- **Framework**: Remix (React)
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State Management**: TanStack Query (React Query)
+- **Forms**: TanStack Form
+- **Tables**: TanStack Table
+- **Router**: TanStack Router (integrated with Remix)
+- **Type Safety**: TypeScript
+- **Build Tool**: Vite (via Remix)
+- **Testing**: Vitest + React Testing Library
 
-- **user_service_db** (Port 5432) - User authentication and profiles
-- **catalog_service_db** (Port 5433) - Movies, theaters, shows, seats
-- **booking_service_db** (Port 5434) - Bookings and seat locks
-- **payment_service_db** (Port 5435) - Payments and refunds
-- **notification_service_db** (Port 5436) - Notification tracking
+### Key Features
+- Server-side rendering (SSR)
+- Optimistic UI updates
+- Real-time seat availability
+- Responsive design
+- Progressive Web App (PWA)
+- SEO optimized
 
-## Quick Start
+### TanStack Libraries Usage
+
+#### TanStack Query
+```typescript
+// useMovies.ts
+export function useMovies() {
+  return useQuery({
+    queryKey: ['movies'],
+    queryFn: () => api.getMovies(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+export function useBookSeat() {
+  return useMutation({
+    mutationFn: (data: BookSeatRequest) => api.bookSeat(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seats'] })
+    }
+  })
+}
+```
+
+#### TanStack Table
+```typescript
+// MyBookings.tsx
+const table = useReactTable({
+  data: bookings,
+  columns: bookingColumns,
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+})
+```
+
+#### TanStack Form
+```typescript
+// LoginForm.tsx
+const form = useForm({
+  defaultValues: {
+    email: '',
+    password: '',
+  },
+  onSubmit: async ({ value }) => {
+    await login(value)
+  },
+})
+```
+
+## 🔧 Backend Architecture
+
+### Microservices
+
+| Service | Port | Database | Purpose |
+|---------|------|----------|---------|
+| Frontend | 3000 | - | React Remix App |
+| API Gateway | 8080 | - | Routing, Auth |
+| User Service | 8081 | user_service_db | Authentication, Profiles |
+| Catalog Service | 8082 | catalog_service_db | Movies, Theaters, Shows |
+| Booking Service | 8083 | booking_service_db | Ticket Bookings |
+| Payment Service | 8084 | payment_service_db | Payments, Refunds |
+| Notification Service | 8085 | notification_service_db | Email, SMS |
+
+### Infrastructure
+
+| Component | Port | Purpose |
+|-----------|------|---------|
+| PostgreSQL (User) | 5432 | User data |
+| PostgreSQL (Catalog) | 5433 | Catalog data |
+| PostgreSQL (Booking) | 5434 | Booking data |
+| PostgreSQL (Payment) | 5435 | Payment data |
+| PostgreSQL (Notification) | 5436 | Notification data |
+| Redis | 6379 | Cache, Locks |
+| Kafka | 9092 | Event Streaming |
+| Prometheus | 9090 | Metrics |
+| Grafana | 3000 | Dashboards |
+| Kibana | 5601 | Log Viewer |
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Java 17+
-- Maven 3.8+
+- **Node.js** 18+
+- **Java** 17+
+- **Maven** 3.8+
+- **Docker** & Docker Compose
+- **Git**
 
-### Running Locally
+### 1. Clone Repository
 
-1. **Clone the repository**
 ```bash
 git clone https://github.com/sgaurav007/book-my-show-clone.git
 cd book-my-show-clone
 ```
 
-2. **Start infrastructure only** (databases, Redis, Kafka)
+### 2. Start Infrastructure
+
 ```bash
+# Start databases, Redis, Kafka
 docker-compose up -d user-db catalog-db booking-db payment-db notification-db redis zookeeper kafka
 ```
 
-3. **Build all services**
+### 3. Build Backend Services
+
 ```bash
-./build-all.sh
+cd backend
+./mvnw clean install -DskipTests
+
+# Or use the script
+./scripts/build-all.sh
 ```
 
-4. **Start all services**
+### 4. Start Backend Services
+
 ```bash
+# Start all backend services
+docker-compose up -d api-gateway user-service catalog-service booking-service payment-service notification-service
+```
+
+### 5. Setup Frontend
+
+```bash
+cd frontend
+npm install
+```
+
+### 6. Start Frontend (Development)
+
+```bash
+npm run dev
+# Frontend runs on http://localhost:3000
+```
+
+### 7. Start Everything at Once
+
+```bash
+# From root directory
 docker-compose up -d
-```
 
-5. **Check service health**
-```bash
-# API Gateway
-curl http://localhost:8080/actuator/health
-
-# User Service
-curl http://localhost:8081/actuator/health
-
-# Catalog Service
-curl http://localhost:8082/actuator/health
-
-# Booking Service
-curl http://localhost:8083/actuator/health
-
-# Payment Service
-curl http://localhost:8084/actuator/health
-
-# Notification Service
-curl http://localhost:8085/actuator/health
-```
-
-### Running with Monitoring
-
-To start services with Prometheus and Grafana:
-
-```bash
+# With monitoring
 docker-compose --profile monitoring up -d
-```
 
-Access:
-- **Grafana**: http://localhost:3000 (admin/admin)
-- **Prometheus**: http://localhost:9090
-
-### Running with ELK Stack
-
-To start services with centralized logging:
-
-```bash
-docker-compose --profile elk up -d
-```
-
-Access:
-- **Kibana**: http://localhost:5601
-- **Elasticsearch**: http://localhost:9200
-
-### Running Everything
-
-To run all services with monitoring and logging:
-
-```bash
+# With monitoring + ELK
 docker-compose --profile monitoring --profile elk up -d
 ```
 
-## API Endpoints
+## 📱 BookMyShow Features
 
-### User Service (Port 8081)
-- `POST /api/users/register` - Register new user
-- `POST /api/users/login` - User login
-- `GET /api/users/profile` - Get user profile
-- `PUT /api/users/profile` - Update profile
+### User Features
+- ✅ User registration and login
+- ✅ Browse movies (Now Showing, Coming Soon)
+- ✅ Search movies by title, genre, language
+- ✅ Filter theaters by location
+- ✅ View show timings
+- ✅ Select seats (interactive seat map)
+- ✅ Real-time seat availability
+- ✅ Apply promo codes
+- ✅ Multiple payment options
+- ✅ Booking confirmation (Email/SMS)
+- ✅ View booking history
+- ✅ Cancel bookings
+- ✅ Download tickets (PDF)
+- ✅ Rate and review movies
 
-### Catalog Service (Port 8082)
-- `GET /api/movies` - List all movies
-- `GET /api/movies/{id}` - Get movie details
-- `GET /api/theaters?city={city}` - Get theaters by city
-- `GET /api/shows?movieId={id}&city={city}&date={date}` - Get shows
-- `GET /api/shows/{showId}/seats` - Get seat availability
+### Admin Features
+- ✅ Add/Edit/Delete movies
+- ✅ Manage theaters and screens
+- ✅ Schedule shows
+- ✅ Configure seat layouts
+- ✅ Set pricing (base + dynamic)
+- ✅ View analytics dashboard
+- ✅ Generate reports
+- ✅ Manage users
+- ✅ Handle refunds
 
-### Booking Service (Port 8083)
-- `POST /api/bookings/lock-seats` - Lock seats (15 min timeout)
-- `POST /api/bookings/confirm` - Confirm booking
-- `GET /api/bookings/{id}` - Get booking details
-- `DELETE /api/bookings/{id}` - Cancel booking
-- `GET /api/bookings/user/{userId}` - Get user bookings
+### Theater Owner Features
+- ✅ Register theater
+- ✅ Manage screens and seats
+- ✅ Schedule shows
+- ✅ Set show pricing
+- ✅ View bookings
+- ✅ Revenue reports
 
-### Payment Service (Port 8084)
-- `POST /api/payments/initiate` - Initiate payment
-- `POST /api/payments/webhook` - Payment gateway webhook
-- `GET /api/payments/{id}` - Get payment details
-- `POST /api/payments/refund` - Process refund
+## 🎯 User Flows
 
-### API Gateway (Port 8080)
-
-All services are accessible through the API Gateway with path-based routing:
-- `/users/**` → User Service
-- `/catalog/**` → Catalog Service
-- `/bookings/**` → Booking Service
-- `/payments/**` → Payment Service
-
-## Kafka Topics
-
-| Topic | Producer | Consumer | Purpose |
-|-------|----------|----------|---------|
-| `booking.created` | Booking Service | Analytics | Booking initiation |
-| `booking.confirmed` | Booking Service | Notification | Send confirmation |
-| `booking.cancelled` | Booking Service | Notification | Send cancellation notice |
-| `payment.initiated` | Payment Service | Analytics | Payment started |
-| `payment.success` | Payment Service | Notification, Booking | Payment completed |
-| `payment.failed` | Payment Service | Notification, Booking | Payment failed |
-
-## Key Features
-
-### Real-Time Seat Locking
-- Distributed locks using Redis
-- 15-minute timeout on seat reservations
-- Automatic lock release on timeout or payment failure
-- Prevents double booking
-
-### Event-Driven Architecture
-- Asynchronous communication via Kafka
-- Eventual consistency across services
-- Decoupled service interactions
-- High scalability
-
-### Observability
-- **Metrics**: Prometheus scrapes Spring Actuator endpoints
-- **Dashboards**: Pre-configured Grafana dashboards
-- **Logging**: Structured JSON logs to ELK stack
-- **Tracing**: Correlation IDs across service calls
-
-### Security
-- JWT-based authentication
-- Password hashing with BCrypt
-- HTTPS in production
-- Role-based access control (CUSTOMER, ADMIN, THEATER_OWNER)
-
-## Development Guidelines
-
-See [claude.md](./claude.md) for detailed development rules and best practices.
-
-Key principles:
-- ✅ Keep it simple - No over-engineering
-- ✅ Complete features - No TODOs
-- ✅ Explicit parameters - Everything required by default
-- ✅ Direct code - Minimal abstractions
-- ✅ Working > Perfect
-
-## Project Structure
+### 1. Movie Booking Flow
 
 ```
-book-my-show-clone/
-├── api-gateway/             # Spring Cloud Gateway
-├── user-service/            # User management
-├── catalog-service/         # Movies, theaters, shows
-├── booking-service/         # Ticket bookings
-├── payment-service/         # Payment processing
-├── notification-service/    # Email/SMS notifications
-├── monitoring/
-│   ├── prometheus/          # Prometheus config
-│   ├── grafana/             # Grafana dashboards
-│   └── logstash/            # Logstash pipeline
-├── k8s/                     # Kubernetes manifests
-├── docker-compose.yml       # Local development
-├── HLD.md                   # High-Level Design
-├── LLD.md                   # Low-Level Design
-├── claude.md                # Development rules
-└── README.md
+Home → Browse Movies → Select Movie → Choose Theater & Show
+→ Select Seats → Review Booking → Payment → Confirmation
 ```
 
-## Testing
+### 2. Seat Selection Flow
 
-### Unit Tests
+```
+View Seat Layout → Select Seats (max 10) → Seats Locked (15 min)
+→ Proceed to Payment → Payment Success → Booking Confirmed
+→ Seats Released if Payment Fails/Timeout
+```
+
+### 3. Payment Flow
+
+```
+Review Booking → Select Payment Method → Enter Details
+→ Process Payment → Webhook Callback → Confirm Booking
+→ Send Confirmation Email/SMS
+```
+
+## 🖥️ Frontend Pages
+
+### Public Pages
+- `/` - Home (Featured movies, banners)
+- `/movies` - Movies list with filters
+- `/movies/:movieId` - Movie details
+- `/theaters` - Theaters list
+- `/auth/login` - Login
+- `/auth/register` - Register
+
+### Protected Pages
+- `/booking/:showId` - Seat selection
+- `/booking/confirm` - Booking review
+- `/payment` - Payment page
+- `/payment/success` - Success page
+- `/profile` - User profile
+- `/profile/bookings` - My bookings
+- `/profile/settings` - Settings
+
+### Admin Pages
+- `/admin/dashboard` - Analytics
+- `/admin/movies` - Movie management
+- `/admin/theaters` - Theater management
+- `/admin/shows` - Show management
+- `/admin/users` - User management
+
+## 🔌 API Endpoints
+
+### User Service (`/api/users`)
+```
+POST   /register          - Register user
+POST   /login            - Login
+POST   /logout           - Logout
+GET    /profile          - Get profile
+PUT    /profile          - Update profile
+POST   /refresh          - Refresh token
+```
+
+### Catalog Service (`/api/catalog`)
+```
+GET    /movies                    - List movies
+GET    /movies/:id                - Movie details
+GET    /movies/search?q=          - Search movies
+GET    /theaters?city=            - List theaters
+GET    /shows?movieId=&city=&date= - List shows
+GET    /shows/:showId/seats       - Seat availability
+```
+
+### Booking Service (`/api/bookings`)
+```
+POST   /lock-seats       - Lock seats (15 min)
+POST   /confirm          - Confirm booking
+GET    /:id              - Booking details
+DELETE /:id              - Cancel booking
+GET    /user/:userId     - User's bookings
+```
+
+### Payment Service (`/api/payments`)
+```
+POST   /initiate         - Initiate payment
+POST   /webhook          - Gateway webhook
+GET    /:id              - Payment details
+POST   /refund           - Process refund
+```
+
+## 🧪 Testing
+
+### Frontend Tests
 ```bash
-mvn test
+cd frontend
+npm run test              # Unit tests
+npm run test:e2e          # E2E tests (Playwright)
+npm run test:coverage     # Coverage report
 ```
 
-### Integration Tests
+### Backend Tests
 ```bash
-mvn verify
+cd backend
+./mvnw test              # Unit tests
+./mvnw verify            # Integration tests
+./mvnw jacoco:report     # Coverage report
 ```
 
-### Load Testing (JMeter)
+### Load Testing
 ```bash
-./run-load-tests.sh
+./scripts/run-load-tests.sh
 ```
 
-## Scaling Strategy
+## 📊 Monitoring
 
-### Horizontal Scaling
-- Stateless services (session in Redis)
-- Kubernetes HPA based on CPU/memory
-- Kafka consumer groups for parallel processing
+### Access Dashboards
 
-### Database Scaling
-- Read replicas for read-heavy operations
-- Connection pooling (HikariCP)
-- Proper indexing on foreign keys
+- **Frontend**: http://localhost:3000
+- **API Gateway**: http://localhost:8080
+- **Grafana**: http://localhost:3001 (admin/admin)
+- **Prometheus**: http://localhost:9090
+- **Kibana**: http://localhost:5601
 
-### Caching Strategy
-- Redis for frequently accessed data
-- Seat availability cached with short TTL
-- Cache invalidation via Kafka events
+### Key Metrics
 
-## Deployment
+- Request rate, latency, errors (RED metrics)
+- JVM metrics (heap, GC)
+- Database connection pool
+- Kafka lag
+- Cache hit ratio
+- Seat lock success rate
+
+## 🚢 Deployment
 
 ### Local Development
 ```bash
 docker-compose up
 ```
 
-### Kubernetes (Production)
+### Production (Azure)
 ```bash
-kubectl apply -f k8s/
+# Build and push Docker images
+./scripts/build-and-push.sh
+
+# Deploy with Terraform
+cd infrastructure/terraform/azure
+terraform init
+terraform plan
+terraform apply
+
+# Or deploy with Helm
+helm install bookmyshow infrastructure/helm/bookmyshow
 ```
 
-### Azure Deployment
-See [docs/azure-deployment.md](./docs/azure-deployment.md)
+### CI/CD Pipeline
 
-## Monitoring & Alerts
-
-### Grafana Dashboards
-- Service health and uptime
-- Request rate, latency, errors (RED metrics)
-- JVM metrics (heap, GC)
-- Database connection pool
-- Kafka lag and throughput
-
-### Prometheus Alerts
-- High error rate (>5%)
-- High latency (P95 >500ms)
-- Service down
-- Database connection pool exhaustion
-- Kafka consumer lag
-
-## Troubleshooting
-
-### Service Not Starting
-```bash
-# Check logs
-docker-compose logs -f <service-name>
-
-# Check dependencies
-docker-compose ps
+```
+GitHub → GitHub Actions → Build → Test → Docker Build
+→ Push to Registry → Deploy to Azure K8s → Smoke Tests
 ```
 
-### Database Connection Issues
-```bash
-# Check database is running
-docker-compose ps user-db catalog-db booking-db payment-db notification-db
+## 🔒 Security
 
-# Check connection from service
-docker-compose exec user-service ping user-db
+- ✅ JWT-based authentication
+- ✅ Password hashing (BCrypt)
+- ✅ HTTPS/TLS encryption
+- ✅ CORS configuration
+- ✅ Rate limiting
+- ✅ SQL injection prevention
+- ✅ XSS protection
+- ✅ CSRF tokens
+- ✅ Secure headers
+- ✅ Input validation
+
+## 🌍 Environment Variables
+
+### Frontend (.env)
+```env
+VITE_API_URL=http://localhost:8080
+VITE_APP_NAME=BookMyShow
+VITE_GOOGLE_CLIENT_ID=xxx
 ```
 
-### Kafka Issues
-```bash
-# Check Kafka topics
-docker-compose exec kafka kafka-topics --list --bootstrap-server localhost:9092
-
-# Check consumer groups
-docker-compose exec kafka kafka-consumer-groups --bootstrap-server localhost:9092 --list
+### Backend (application.yml)
+```yaml
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 ```
 
-## Performance Benchmarks
+## 📈 Performance Targets
 
-| Metric | Target | Achieved |
-|--------|--------|----------|
-| Concurrent Users | 1M+ | TBD |
-| Transactions/Day | 10M+ | TBD |
-| API Latency (P95) | <200ms | TBD |
-| System Uptime | 99.9% | TBD |
-| Booking Success Rate | >95% | TBD |
+| Metric | Target | Status |
+|--------|--------|--------|
+| Page Load Time | < 2s | ⏳ |
+| API Response (P95) | < 200ms | ⏳ |
+| Concurrent Users | 1M+ | ⏳ |
+| Transactions/Day | 10M+ | ⏳ |
+| System Uptime | 99.9% | ⏳ |
+| Seat Lock Success | > 95% | ⏳ |
 
-## Future Enhancements
+## 🛠️ Development
 
-- [ ] AI-powered movie recommendations
-- [ ] Dynamic pricing based on demand
-- [ ] Social features (reviews, sharing)
-- [ ] Mobile app (React Native)
-- [ ] Multi-region deployment
-- [ ] Chaos engineering tests
+### Code Style
+- Follow [claude.md](./claude.md) guidelines
+- Use ESLint + Prettier (Frontend)
+- Use Checkstyle (Backend)
+- Write meaningful commit messages
 
-## Contributing
+### Git Workflow
+```bash
+# Create feature branch
+git checkout -b feature/amazing-feature
+
+# Make changes
+git add .
+git commit -m "feat: add amazing feature"
+
+# Push and create PR
+git push origin feature/amazing-feature
+```
+
+## 📚 Documentation
+
+- [HLD.md](./HLD.md) - High-Level Design
+- [LLD.md](./LLD.md) - Low-Level Design
+- [claude.md](./claude.md) - Development Rules
+- [API Documentation](./docs/api/)
+- [Deployment Guide](./docs/deployment/)
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Create Pull Request
 
-## License
+## 📝 License
 
-MIT License - See [LICENSE](LICENSE) file for details
+MIT License - See [LICENSE](LICENSE)
 
-## Author
+## 👨‍💻 Author
 
 **Gaurav Singh**
 - GitHub: [@sgaurav007](https://github.com/sgaurav007)
-- Email: gaurav.singh@example.com
+- LinkedIn: [Gaurav Singh](https://linkedin.com/in/sgaurav007)
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- Spring Boot team for excellent framework
-- Confluent for Kafka
-- HashiCorp for best practices guides
+- Remix team for excellent framework
+- TanStack for amazing libraries
+- Spring Boot team
 - BookMyShow for inspiration
 
 ---
 
 **⭐ Star this repo if you find it helpful!**
+
+## 📞 Support
+
+For issues and questions:
+- Open an issue on GitHub
+- Email: gaurav.singh@example.com
+- Discord: [Join our server](https://discord.gg/bookmyshow-clone)
+
+---
+
+Built with ❤️ using React, Remix, Spring Boot, and TanStack

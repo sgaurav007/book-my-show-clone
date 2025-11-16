@@ -1,8 +1,8 @@
-# High-Level Design (HLD) - BookMyShow Clone
+# High-Level Design (HLD) - BookMyShow Clone (Full-Stack)
 
 ## 1. System Overview
 
-A scalable, distributed ticket booking system built using microservices architecture, designed to handle millions of concurrent users and billions of transactions. The system supports movie/event ticketing with real-time seat locking, payment processing, and notifications.
+A production-ready, full-stack ticket booking platform built with React (Remix) frontend and Spring Boot microservices backend, designed to handle millions of concurrent users and billions of transactions. The system supports movie/event ticketing with real-time seat locking, payment processing, and notifications.
 
 ### Key Requirements
 - **Scalability**: Handle 1M+ concurrent users
@@ -10,26 +10,38 @@ A scalable, distributed ticket booking system built using microservices architec
 - **Consistency**: Distributed transactions with eventual consistency
 - **Real-time**: Seat locking and availability updates
 - **Observability**: Comprehensive monitoring and logging
+- **User Experience**: Fast, responsive, SEO-optimized frontend
 
 ---
 
-## 2. Architecture Diagram
+## 2. Full-Stack Architecture Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Load Balancer                            │
-│                      (NGINX/AWS ALB)                             │
+│                         Users (Web/Mobile)                       │
 └────────────────────────────┬────────────────────────────────────┘
                              │
-┌────────────────────────────┴────────────────────────────────────┐
-│                  Spring Cloud Gateway                            │
-│         (API Gateway, Rate Limiting, Auth)                       │
+┌────────────────────────────▼────────────────────────────────────┐
+│                     Frontend Layer                               │
+│          React + Remix (SSR) + TanStack Libraries                │
+│              (Port 3000 - Hosted on CDN/Azure)                   │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ HTTPS/REST
+┌────────────────────────────▼────────────────────────────────────┐
+│                         Load Balancer                            │
+│                      (NGINX/Azure App Gateway)                   │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────────┐
+│                  Spring Cloud Gateway (API Gateway)              │
+│         (Port 8080 - Routing, Auth, Rate Limiting, CORS)         │
 └────┬──────────┬──────────┬──────────┬──────────┬────────────────┘
      │          │          │          │          │
      ▼          ▼          ▼          ▼          ▼
 ┌─────────┐┌─────────┐┌─────────┐┌─────────┐┌──────────┐
 │  User   ││ Catalog ││ Booking ││ Payment ││Notification│
 │ Service ││ Service ││ Service ││ Service ││  Service   │
+│  :8081  ││  :8082  ││  :8083  ││  :8084  ││   :8085    │
 └────┬────┘└────┬────┘└────┬────┘└────┬────┘└─────┬─────┘
      │          │          │          │           │
      └──────────┴──────────┴──────────┴───────────┘
@@ -39,12 +51,12 @@ A scalable, distributed ticket booking system built using microservices architec
                 │  (Event Streaming)      │
                 └────────────┬────────────┘
                              │
-     ┌───────────────────────┼───────────────────────┐
-     │                       │                       │
-┌────▼─────┐         ┌──────▼──────┐        ┌──────▼──────┐
-│PostgreSQL│         │   Redis     │        │ Elasticsearch│
-│ (Primary)│         │  (Cache)    │        │   (Logs)     │
-└──────────┘         └─────────────┘        └──────────────┘
+     ┌───────────────────────┼───────────────────────────┐
+     │                       │                           │
+┌────▼─────┐         ┌──────▼──────┐        ┌──────────▼──────┐
+│PostgreSQL│         │   Redis     │        │  Elasticsearch  │
+│(5 DBs)   │         │  (Cache)    │        │   (Logs/Search) │
+└──────────┘         └─────────────┘        └─────────────────┘
 
 ┌──────────────────────────────────────────────────────────┐
 │              Observability Stack                          │
@@ -62,9 +74,134 @@ A scalable, distributed ticket booking system built using microservices architec
 
 ---
 
-## 3. Microservices Breakdown
+## 3. Frontend Architecture
 
-### 3.1 User Service
+### 3.1 Technology Stack
+- **Framework**: Remix (React with SSR)
+- **Language**: TypeScript
+- **State Management**: TanStack Query (React Query)
+- **Forms**: TanStack Form
+- **Tables**: TanStack Table
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Build Tool**: Vite
+- **Testing**: Vitest + React Testing Library + Playwright
+- **Deployment**: Azure Static Web Apps / Vercel
+
+### 3.2 Key Features
+- **Server-Side Rendering (SSR)**: Fast initial page loads, SEO optimized
+- **Progressive Enhancement**: Works without JavaScript
+- **Optimistic UI**: Immediate feedback on user actions
+- **Real-time Updates**: WebSocket/Polling for seat availability
+- **Responsive Design**: Mobile-first approach
+- **Accessibility**: WCAG 2.1 AA compliant
+- **PWA**: Offline support, installable
+
+### 3.3 Frontend Architecture Layers
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Presentation Layer                    │
+│  - Remix Routes (File-based routing)                    │
+│  - React Components (UI/shadcn)                         │
+│  - Tailwind CSS (Styling)                               │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────────────────┐
+│                    Data Layer                            │
+│  - TanStack Query (Server state)                        │
+│  - React Context (Client state)                         │
+│  - TanStack Form (Form state)                           │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────────────────┐
+│                    API Layer                             │
+│  - Axios/Fetch Client                                   │
+│  - API Service Functions                                │
+│  - Request/Response Interceptors                        │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────────────────┐
+│                    Backend (API Gateway)                 │
+│  - Spring Cloud Gateway (Port 8080)                     │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 3.4 Page Structure
+
+#### Public Routes
+- `/` - Home (Featured movies, hero section)
+- `/movies` - Movies listing with filters
+- `/movies/:id` - Movie details page
+- `/theaters` - Theaters listing
+- `/auth/login` - User login
+- `/auth/register` - User registration
+
+#### Protected Routes (Requires Auth)
+- `/booking/:showId` - Seat selection page
+- `/booking/confirm` - Booking confirmation
+- `/payment` - Payment processing
+- `/payment/success` - Payment success
+- `/profile` - User profile
+- `/profile/bookings` - My bookings
+- `/profile/settings` - User settings
+
+#### Admin Routes (Admin Only)
+- `/admin/dashboard` - Analytics dashboard
+- `/admin/movies` - Movie management
+- `/admin/theaters` - Theater management
+- `/admin/shows` - Show scheduling
+- `/admin/users` - User management
+
+### 3.5 Component Architecture
+
+```typescript
+// Atomic Design Pattern
+components/
+├── ui/                    # Base components (shadcn/ui)
+│   ├── Button.tsx
+│   ├── Input.tsx
+│   ├── Card.tsx
+│   └── ...
+├── MovieCard.tsx          # Molecule
+├── SeatLayout.tsx         # Organism
+├── BookingFlow.tsx        # Template
+└── ...
+```
+
+### 3.6 State Management Strategy
+
+#### Server State (TanStack Query)
+- Movies, theaters, shows data
+- User bookings
+- Seat availability
+- Payment status
+
+```typescript
+const { data: movies, isLoading } = useQuery({
+  queryKey: ['movies', city],
+  queryFn: () => api.getMovies(city),
+  staleTime: 5 * 60 * 1000,
+})
+```
+
+#### Client State (React Context)
+- Auth state (JWT token, user info)
+- UI state (modals, toasts)
+- Selected seats
+- Booking cart
+
+### 3.7 Performance Optimizations
+- **Code Splitting**: Route-based lazy loading
+- **Image Optimization**: Next-gen formats (WebP, AVIF)
+- **Caching**: Aggressive client-side caching with TanStack Query
+- **Prefetching**: Link prefetching for critical routes
+- **Bundle Size**: Tree shaking, minimal dependencies
+
+---
+
+## 4. Backend Microservices Breakdown
+
+### 4.1 User Service
 **Responsibility**: User authentication, authorization, profile management
 
 **Key Features**:
