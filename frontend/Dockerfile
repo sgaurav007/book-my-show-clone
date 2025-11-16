@@ -4,8 +4,8 @@ FROM node:18-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-COPY frontend/package.json frontend/package-lock.json* ./
-RUN npm ci
+COPY frontend/package.json ./
+RUN npm install
 
 # Rebuild the source code only when needed
 FROM base AS builder
