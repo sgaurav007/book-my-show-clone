@@ -27,7 +27,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <testcontainers.version>1.19.3</testcontainers.version>
         <jjwt.version>0.12.3</jjwt.version>
-        <flyway.version>9.22.3</flyway.version>
     </properties>
 
     <dependencies>
@@ -86,12 +85,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
 
         <!-- JWT -->

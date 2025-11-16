@@ -26,7 +26,6 @@
         <maven.compiler.target>17</maven.compiler.target>
         <testcontainers.version>1.19.3</testcontainers.version>
         <rest-assured.version>5.3.2</rest-assured.version>
-        <flyway.version>9.22.3</flyway.version>
     </properties>
 
     <dependencies>
@@ -73,12 +72,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
 
         <!-- Lombok -->
